@@ -3,10 +3,9 @@ const gmail = require('../gmail')
 module.exports = router => {
     router.get('/api/messages', async (req, res) => {
         try {
-            const response = await gmail.getMessages()
-            console.log(response)
+            const data = await gmail.getMessages()
             res.status(200)
-            res.send(JSON.stringify({message: 'success'}))
+            res.send(JSON.stringify({data}))
         } catch(error) {
             console.log(error)
             res.status(400)

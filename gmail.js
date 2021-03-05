@@ -20,8 +20,8 @@ function getMessages() {
         rf('credentials.json').then(async content => {
             // authorize(JSON.parse(content), listLabels);
                 const auth = await authorize(JSON.parse(content));
-                await listMessages(auth)
-                res()
+                const paths = await listMessages(auth)
+                res(paths)
         })
     })
 }
@@ -85,26 +85,27 @@ function getNewToken(oAuth2Client, callback) {
 function listMessages(auth) {
   const gmail = google.gmail({version: 'v1', auth})
   const userId = 'me'  
-  let dirs = []
-  gmail.users.messages.list({userId}, (err, messages) => {
-    messages.data.messages.map(({ id }) => {
-      gmail.users.messages.get({userId, id}, async (error, { data }) => {
-        await data.payload.parts.map(async part => {
-          if (part && part.body.attachmentId) {
-            const dir = await getDir(gmail, {
-              userId,
-              id
-            })
-            createDir(`./output/${dir}`)
-            await pushImg(gmail, {
-              userId,
-              id,
-              part
-            }, dir)
-          }
+  return new Promise((resolve, reject) => {
+    gmail.users.messages.list({userId}, (err, messages) => {
+      messages.data.messages.map(({ id }) => {
+        gmail.users.messages.get({userId, id}, async (error, { data }) => {
+          await data.payload.parts.map(async part => {
+            if (part && part.body.attachmentId) {
+              const dir = await getDir(gmail, {
+                userId,
+                id
+              })
+              createDir(`./output/${dir}`)
+              await pushImg(gmail, {
+                userId,
+                id,
+                part
+              }, dir)
+              resolve(getPaths())
+            }
+          })
         })
       })
-      console.log('____')
     })
   })
 }
@@ -116,7 +117,6 @@ const getDir = (gmail, data) => {
         const sendDate = moment(Number(metaData.data.internalDate)).format("MM.DD.YYYY-hh:mm")
         resolve(`${metaData.data.payload.headers[0].value.split('<')[0].trim()} ${sendDate}`)
       }
-      // dirs.push(dirName)//
     })
   })
   
@@ -126,17 +126,27 @@ const pushImg = (gmail, data, dirName) => {
   return new Promise(async (resolve, reject) => {
     gmail.users.messages.attachments.get({id: data.part.body.attachmentId, messageId: data.id, userId: data.userId}, async (err, attachment) => {
       if (attachment.data.data) {
-        console.log(1)
-        console.log(data.part.filename, dirName)
         await base64ToImage(
           `data:image/jpeg;base64, ${attachment.data.data}`,
           `./output/${dirName}/`,
           {fileName: `${data.part.filename}`, type: 'jpeg'}
         )
-        resolve()
+        resolve(data.part.fileName)
       }
     })
   })
+}
+
+const getPaths = () => {
+  const paths = {}
+  const rootDir = './output'
+  fs.readdirSync(rootDir).map(directory => {
+    paths[directory] = []
+    fs.readdirSync(`${rootDir}/${directory}`).map(img => {
+      paths[directory].push(img)
+    })
+  })
+  return paths
 }
 
 
