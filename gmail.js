@@ -1,17 +1,17 @@
-var base64ToImage = require('base64-to-image');
-const fs = require('fs');
+const base64ToImage = require('base64-to-image')
+const fs = require('fs')
 const util = require('util')
-const readline = require('readline');
-const {google} = require('googleapis');
+const readline = require('readline')
+const {google} = require('googleapis')
 const moment = require('moment')
 const createDir = require('./helpers/createDir')
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
+const SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-const TOKEN_PATH = 'token.json';
+const TOKEN_PATH = 'token.json'
 // Load client secrets from a local file.
 
 const rf = util.promisify(fs.readFile)
@@ -19,8 +19,8 @@ const rf = util.promisify(fs.readFile)
 function getMessages() {
     return new Promise((res, rej) => {
         rf('credentials.json').then(async content => {
-            // authorize(JSON.parse(content), listLabels);
-                const auth = await authorize(JSON.parse(content));
+            // authorize(JSON.parse(content), listLabels)
+                const auth = await authorize(JSON.parse(content))
                 const paths = await listMessages(auth)
                 res(paths)
         })
@@ -39,13 +39,13 @@ module.exports = {
  */
 function authorize(credentials) {
     return new Promise((res, rej) => {
-        const {client_secret, client_id, redirect_uris} = credentials.web;
+        const {client_secret, client_id, redirect_uris} = credentials.web
         const oAuth2Client = new google.auth.OAuth2(
-            client_id, client_secret, redirect_uris[0]);
+            client_id, client_secret, redirect_uris[0])
 
         // Check if we have previously stored a token.
         rf(TOKEN_PATH).then(token => {
-            oAuth2Client.setCredentials(JSON.parse(token));
+            oAuth2Client.setCredentials(JSON.parse(token))
             res(oAuth2Client)
         })
     })
@@ -62,25 +62,25 @@ function getNewToken(oAuth2Client, callback) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
-  });
-  console.log('Authorize this app by visiting this url:', authUrl);
+  })
+  console.log('Authorize this app by visiting this url:', authUrl)
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-  });
+  })
   rl.question('Enter the code from that page here: ', (code) => {
-    rl.close();
+    rl.close()
     oAuth2Client.getToken(code, (err, token) => {
-      if (err) return console.error('Error retrieving access token', err);
-      oAuth2Client.setCredentials(token);
+      if (err) return console.error('Error retrieving access token', err)
+      oAuth2Client.setCredentials(token)
       // Store the token to disk for later program executions
       fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-        if (err) return console.error(err);
-        console.log('Token stored to', TOKEN_PATH);
-      });
-      callback(oAuth2Client);
-    });
-  });
+        if (err) return console.error(err)
+        console.log('Token stored to', TOKEN_PATH)
+      })
+      callback(oAuth2Client)
+    })
+  })
 }
 
 function listMessages(auth) {
@@ -128,7 +128,7 @@ const pushImg = (gmail, data, dirName) => {
     gmail.users.messages.attachments.get({id: data.part.body.attachmentId, messageId: data.id, userId: data.userId}, async (err, attachment) => {
       if (attachment.data.data) {
         await base64ToImage(
-          `data:image/jpeg;base64, ${attachment.data.data}`,
+          `data:image/jpegbase64, ${attachment.data.data}`,
           `./output/${dirName}/`,
           {fileName: `${data.part.filename}`, type: 'jpeg'}
         )
