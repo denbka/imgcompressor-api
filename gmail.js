@@ -4,6 +4,7 @@ const util = require('util')
 const readline = require('readline');
 const {google} = require('googleapis');
 const moment = require('moment')
+const createDir = require('./helpers/createDir')
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -147,11 +148,4 @@ const getPaths = () => {
     })
   })
   return paths
-}
-
-
-const createDir = (dirName) => {
-  if (!fs.existsSync(dirName)) {
-    fs.mkdirSync(dirName)
-  }
 }
