@@ -127,8 +127,9 @@ const pushImg = (gmail, data, dirName) => {
   return new Promise(async (resolve, reject) => {
     gmail.users.messages.attachments.get({id: data.part.body.attachmentId, messageId: data.id, userId: data.userId}, async (err, attachment) => {
       if (attachment.data.data) {
+        console.log(attachment.data.data)
         await base64ToImage(
-          `data:image/jpegbase64, ${attachment.data.data}`,
+          `data:image/jpeg;base64, ${attachment.data.data}`,
           `./output/${dirName}/`,
           {fileName: `${data.part.filename}`, type: 'jpeg'}
         )
