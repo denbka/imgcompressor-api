@@ -14,7 +14,7 @@ app.all('/*', function(req, res, next) {
     next();
 });
 app.use('/', require('./routes/messageRouter')(router))
+whatsapp()
 httpServer.listen(8000, () => {
-    // whatsapp()
     console.log('app listen')
 })

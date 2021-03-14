@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "killall -9 node && nodemon index.js"
+    "start": "killall -9 node && nodemon index.js",
+    "dev": "killall -9 node && node index.js"
   },
   "dependencies": {
     "base64-to-image": "^1.0.2",
