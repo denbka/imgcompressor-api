@@ -3,6 +3,7 @@ const base64ToImage = require('base64-to-image')
 const qrcode = require('qrcode-terminal')
 const createDir = require('./helpers/createDir')
 const fs = require('fs')
+const qs = require('querystring')
 const SESSION_FILE_PATH = './wapp-session.json'
 let sessionData
 if(fs.existsSync(SESSION_FILE_PATH)) {
@@ -14,7 +15,7 @@ const client = new Client({
     session: sessionData
 })
 
-module.exports = () => {
+module.exports = (io) => {
     
 
     client.on('qr', (qr) => {
@@ -61,11 +62,25 @@ module.exports = () => {
                     `wphotos/${directory}/`,
                     {fileName: `image-${msg.timestamp}`, type: 'jpeg'}
                 )
+                io.emit('getImageFromWatsapp', {file: media.data, fileName: `image-${msg.timestamp}`, directory})
             } catch(e) {
                 console.log(e)
             }
             
         }
+    })
+
+    io.on('connection', socket => {
+        console.log('a user connected')
+        socket.on('setImageFromWatsapp', async ({ data, directory, fileName }) => {
+            console.log(data, directory, fileName)
+            createDir(`wphotos-rendered/${directory}/`)
+            await base64ToImage(
+                data,
+                `wphotos-rendered/${directory}/`,
+                {fileName, type: 'jpeg'}
+            )
+        })
     })
     
     client.initialize()

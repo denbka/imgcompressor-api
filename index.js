@@ -10,11 +10,12 @@ const whatsapp = require('./whatsapp')
 //I0iO3Cy2jE3MlWaNOcPAlaFn
 
 app.all('/*', function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    next();
-});
+    res.header("Access-Control-Allow-Origin", "*")
+    next()
+})
 app.use('/', require('./routes/messageRouter')(router))
-whatsapp()
+
+whatsapp(io)
 httpServer.listen(8000, () => {
     console.log('app listen')
 })

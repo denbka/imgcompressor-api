@@ -6,20 +6,15 @@ const {google} = require('googleapis')
 const moment = require('moment')
 const createDir = require('./helpers/createDir')
 
-// If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
+
 const TOKEN_PATH = 'token.json'
-// Load client secrets from a local file.
 
 const rf = util.promisify(fs.readFile)
 
 function getMessages() {
     return new Promise((res, rej) => {
         rf('credentials.json').then(async content => {
-            // authorize(JSON.parse(content), listLabels)
                 const auth = await authorize(JSON.parse(content))
                 const paths = await listMessages(auth)
                 res(paths)
