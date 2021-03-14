@@ -54,10 +54,11 @@ module.exports = () => {
         if(msg.hasMedia) {
             try {
                 const media = await msg.downloadMedia()
-                console.log(media.data.slice(1,7))
+                const directory = msg.to.split('@')[0]
+                createDir(`wphotos/${directory}/`)
                 await base64ToImage(
                     `data:image/jpeg;base64, ${media.data}`,
-                    `wphotos/`,
+                    `wphotos/${directory}/`,
                     {fileName: `image-${msg.timestamp}`, type: 'jpeg'}
                 )
             } catch(e) {
